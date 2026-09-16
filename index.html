@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Evet Kofte — POS</title>
+<meta name="description" content="Evet Kofte Point of Sale — cashier and admin app">
+<meta name="theme-color" content="#C8102E">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+<div id="app">
+  <!-- App renders entirely via JS into here -->
+</div>
+
+<!-- Third-party libraries (self-hosted, no CDN required — app works fully offline
+     except for the final report email/Drive upload step). -->
+<script src="./lib/qrcode.min.js"></script>
+<script src="./lib/xlsx.full.min.js"></script>
+
+<!-- App modules (plain scripts, load order matters) -->
+<script src="./js/utils.js"></script>
+<script src="./js/icons.js"></script>
+<script src="./js/db.js"></script>
+<script src="./js/receipt.js"></script>
+<script src="./js/report.js"></script>
+<script src="./js/pos-modal.js"></script>
+<script src="./js/cashier.js"></script>
+<script src="./js/admin.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>
