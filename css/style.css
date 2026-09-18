@@ -70,6 +70,14 @@ button{ -webkit-tap-highlight-color:transparent; }
 
 .num{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
 
+/* Every icon in the app comes from icons.js as a bare <svg viewBox="0 0 24 24">
+   with no width/height of its own — without a default, an unconstrained SVG
+   falls back to its native ~300x150 replaced-element size and only looks
+   right by accident, wherever a tight flex container happens to squeeze it
+   back down. This sets a sane size everywhere; specific contexts below
+   (nav, role picker, QR code, etc.) override it as needed. */
+svg{ width:20px; height:20px; flex-shrink:0; }
+
 /* ==========================================================================
    App shell — portrait-first: bottom nav bar (thumb reach), topbar carries
    the clock instead of the old side rail.
@@ -120,10 +128,11 @@ button{ -webkit-tap-highlight-color:transparent; }
   height:60px; flex:0 0 60px; display:flex; align-items:center; justify-content:space-between;
   padding:0 16px; background:var(--surface); border-bottom:1px solid var(--border);
 }
-.topbar h1{ font-size:19px; font-weight:800; letter-spacing:-0.01em; }
-.topbar .sub{ font-size:12px; color:var(--ink-faint); font-weight:500; margin-top:1px; }
-.topbar-left{ display:flex; align-items:center; gap:10px; }
-.topbar-right{ display:flex; align-items:center; gap:10px; }
+.topbar h1{ font-size:19px; font-weight:800; letter-spacing:-0.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.topbar .sub{ font-size:12px; color:var(--ink-faint); font-weight:500; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.topbar-left{ display:flex; align-items:center; gap:10px; min-width:0; flex:1; }
+.topbar-left > div:last-child{ min-width:0; }
+.topbar-right{ display:flex; align-items:center; gap:10px; flex-shrink:0; }
 .topbar-mark{
   width:32px; height:32px; border-radius:9px; background:var(--red); flex-shrink:0;
   color:#fff; display:flex; align-items:center; justify-content:center;
@@ -163,6 +172,7 @@ button{ -webkit-tap-highlight-color:transparent; }
 .btn-soft{ background:var(--red-soft); color:var(--red); }
 .btn-soft:hover{ background:var(--red-softer); }
 .btn-lg{ padding:16px 22px; font-size:15px; border-radius:12px; }
+.btn-lg svg{ width:22px; height:22px; }
 .btn-sm{ padding:8px 12px; font-size:12.5px; border-radius:8px; }
 .btn-block{ width:100%; }
 .btn-danger{ background:var(--red); color:#fff; border-color:var(--red); }
@@ -185,7 +195,7 @@ button{ -webkit-tap-highlight-color:transparent; }
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   padding:60px 20px; color:var(--ink-faint); text-align:center; gap:10px;
 }
-.empty-state .ic{ width:52px; height:52px; color:var(--border-strong); }
+.empty-state svg{ width:52px; height:52px; color:var(--border-strong); }
 .empty-state h3{ color:var(--ink-soft); font-size:15px; }
 .empty-state p{ font-size:13px; max-width:340px; }
 
@@ -489,3 +499,37 @@ button{ -webkit-tap-highlight-color:transparent; }
   #print-area, #print-area *{ visibility:visible; }
   #print-area{ position:fixed; top:0; left:0; width:100%; }
 }
+
+/* ==========================================================================
+   Responsive: the app is built mobile/tablet-first (see everything above).
+   These two breakpoints extend that same layout to the far ends of the
+   range — a real phone, and a laptop/desktop browser window — without a
+   second design to maintain.
+   ========================================================================== */
+
+/* Laptop / desktop: an edge-to-edge bottom nav and stretched-out grids look
+   wrong at 1400px wide. Cap the whole app to a comfortable phone/tablet
+   width and center it, like most mobile-first web apps do when opened on
+   a big screen — everything below this breakpoint is untouched. */
+@media (min-width: 900px){
+  html, body{ background:#DEDEE3; }
+  #app{
+    max-width:640px; margin:0 auto; height:100vh;
+    box-shadow:0 0 0 1px rgba(0,0,0,0.04), 0 20px 60px rgba(20,15,20,0.18);
+  }
+}
+
+/* Small phones: tighten padding and type so nothing feels cramped or
+   clipped at ~360-390px wide (iPhone SE and similar). */
+@media (max-width: 380px){
+  .content{ padding:14px; }
+  .topbar{ padding:0 12px; }
+  .nav-rail{ padding:4px 2px calc(4px + env(safe-area-inset-bottom, 0px)); }
+  .nav-btn{ font-size:9.5px; min-height:50px; padding:6px 1px; }
+  .nav-btn svg{ width:20px; height:20px; }
+  .kpi-row{ grid-template-columns:repeat(auto-fit, minmax(110px, 1fr)); gap:8px; }
+  .item-grid{ grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:8px; }
+  .session-hero{ padding:18px; }
+  .session-hero .clock{ font-size:26px; }
+}
+
