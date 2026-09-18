@@ -39,8 +39,6 @@
   --radius-sm: 8px;
   --radius: 14px;
   --radius-lg: 20px;
-  --nav-w: 96px;
-  --cart-w: 380px;
   --shadow-modal: 0 20px 60px rgba(20,15,20,0.28);
   --shadow-card: 0 1px 2px rgba(20,15,20,0.04);
   --shadow-pop: 0 10px 30px rgba(20,15,20,0.14);
@@ -73,65 +71,64 @@ button{ -webkit-tap-highlight-color:transparent; }
 .num{ font-family:var(--font-mono); font-variant-numeric:tabular-nums; }
 
 /* ==========================================================================
-   App shell
+   App shell — portrait-first: bottom nav bar (thumb reach), topbar carries
+   the clock instead of the old side rail.
    ========================================================================== */
 #app{ height:100vh; width:100vw; overflow:hidden; position:relative; }
 
-.shell{ display:flex; height:100%; width:100%; }
+.shell{ display:flex; flex-direction:column; height:100%; width:100%; }
 
-/* Left nav rail */
+.main{ flex:1; min-width:0; display:flex; flex-direction:column; height:100%; overflow:hidden; order:1; }
+
+/* Bottom nav bar */
 .nav-rail{
-  width:var(--nav-w);
-  flex:0 0 var(--nav-w);
+  order:2;
+  flex:0 0 auto;
+  width:100%;
   background:var(--surface);
-  border-right:1px solid var(--border);
+  border-top:1px solid var(--border);
   display:flex;
-  flex-direction:column;
+  flex-direction:row;
   align-items:stretch;
-  padding:14px 8px;
-  gap:4px;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  gap:2px;
 }
-.nav-brand{
-  display:flex; flex-direction:column; align-items:center;
-  gap:4px; padding:6px 0 16px 0; margin-bottom:6px;
-  border-bottom:1px solid var(--border);
-}
-.nav-brand .mark{
-  width:40px; height:40px; border-radius:11px; background:var(--red);
-  color:#fff; display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:15px; letter-spacing:0.02em;
-}
-.nav-brand .label{ font-size:10px; font-weight:700; color:var(--ink-faint); letter-spacing:0.06em; text-transform:uppercase; }
+.nav-brand{ display:none; }
 
 .nav-btn{
-  display:flex; flex-direction:column; align-items:center; gap:5px;
-  padding:11px 4px; border:none; background:transparent; border-radius:var(--radius-sm);
-  color:var(--ink-soft); cursor:pointer; font-size:11px; font-weight:600;
+  flex:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  padding:8px 2px; border:none; background:transparent; border-radius:var(--radius-sm);
+  color:var(--ink-soft); cursor:pointer; font-size:10.5px; font-weight:600; min-height:56px;
 }
 .nav-btn .ic{ width:24px; height:24px; display:flex; align-items:center; justify-content:center; }
 .nav-btn svg{ width:22px; height:22px; }
 .nav-btn.active{ background:var(--red-soft); color:var(--red); }
 .nav-btn:active{ transform:scale(0.96); }
-.nav-spacer{ flex:1; }
+.nav-spacer{ display:none; }
 .nav-btn.danger{ color:var(--red); }
-.nav-clock{
-  font-size:10px; color:var(--ink-faint); text-align:center; padding:8px 2px 2px;
-  border-top:1px solid var(--border); font-family:var(--font-mono);
-  display:flex; flex-direction:column; gap:1px;
-}
-.nav-clock b{ color:var(--ink-soft); font-size:11px; }
+.nav-clock{ display:none; }
 
-/* Main column */
-.main{ flex:1; min-width:0; display:flex; flex-direction:column; height:100%; overflow:hidden; }
+/* Clock now lives in the topbar */
+.topbar-clock{
+  font-family:var(--font-mono); text-align:right; line-height:1.25;
+}
+.topbar-clock b{ display:block; font-size:14px; color:var(--ink); }
+.topbar-clock span{ font-size:10.5px; color:var(--ink-faint); }
 
 .topbar{
-  height:64px; flex:0 0 64px; display:flex; align-items:center; justify-content:space-between;
-  padding:0 22px; background:var(--surface); border-bottom:1px solid var(--border);
+  height:60px; flex:0 0 60px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 16px; background:var(--surface); border-bottom:1px solid var(--border);
 }
 .topbar h1{ font-size:19px; font-weight:800; letter-spacing:-0.01em; }
 .topbar .sub{ font-size:12px; color:var(--ink-faint); font-weight:500; margin-top:1px; }
-.topbar-left{ display:flex; flex-direction:column; }
+.topbar-left{ display:flex; align-items:center; gap:10px; }
 .topbar-right{ display:flex; align-items:center; gap:10px; }
+.topbar-mark{
+  width:32px; height:32px; border-radius:9px; background:var(--red); flex-shrink:0;
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:12px; letter-spacing:0.02em;
+}
 
 .badge{
   display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700;
@@ -258,7 +255,7 @@ button{ -webkit-tap-highlight-color:transparent; }
 .session-hero .stat b{ display:block; font-size:20px; font-weight:800; font-family:var(--font-mono); }
 .session-hero .stat span{ font-size:11.5px; opacity:0.8; text-transform:uppercase; letter-spacing:0.04em; }
 
-.kpi-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+.kpi-row{ display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:12px; margin-bottom:20px; }
 .kpi{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
 .kpi .lbl{ font-size:11.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase; letter-spacing:0.04em; }
 .kpi .val{ font-size:22px; font-weight:800; margin-top:6px; font-family:var(--font-mono); }
@@ -290,34 +287,49 @@ button{ -webkit-tap-highlight-color:transparent; }
 .tab-card.new span{ font-weight:700; font-size:13px; }
 
 /* ==========================================================================
-   Order builder (menu grid + ticket rail)
+   Order builder — portrait: Menu and Ticket are separate full-width pages
+   toggled via a segmented control at top, with a sticky summary bar on the
+   Menu page for quick access to the ticket without losing your place.
    ========================================================================== */
-.order-layout{ display:flex; height:100%; }
-.order-menu{ flex:1; min-width:0; display:flex; flex-direction:column; overflow:hidden; }
-.order-menu-tabs{ display:flex; gap:8px; padding:14px 20px 0; }
+.order-layout{ display:flex; flex-direction:column; height:100%; }
+.order-toggle{ display:flex; gap:8px; padding:12px 16px 0; flex:0 0 auto; }
+.order-toggle-btn{
+  flex:1; padding:11px 0; border-radius:99px; font-size:13.5px; font-weight:700; cursor:pointer;
+  background:var(--surface-sunken); color:var(--ink-soft); border:none; text-align:center;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.order-toggle-btn.active{ background:var(--red); color:#fff; }
+.order-page{ flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+
+.order-menu-tabs{ display:flex; gap:8px; padding:14px 16px 0; flex-wrap:wrap; row-gap:8px; }
 .chip-tab{
   padding:9px 16px; border-radius:99px; font-size:13px; font-weight:700; cursor:pointer;
   background:var(--surface-sunken); color:var(--ink-soft); border:none;
 }
 .chip-tab.active{ background:var(--red); color:#fff; }
-.menu-scroll{ flex:1; overflow-y:auto; padding:18px 20px 90px; }
+.menu-scroll{ flex:1; overflow-y:auto; padding:16px 16px 18px; }
 .menu-cat{ font-size:12px; font-weight:800; color:var(--ink-faint); text-transform:uppercase; letter-spacing:0.05em; margin:18px 0 10px; }
 .menu-cat:first-child{ margin-top:0; }
-.item-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+.item-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
 .item-card{
   background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
-  padding:14px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:10px; min-height:96px;
+  padding:14px; cursor:pointer; text-align:left; display:flex; flex-direction:column; gap:10px; min-height:92px;
 }
 .item-card:active{ transform:scale(0.97); background:var(--red-soft); border-color:var(--red-softer); }
 .item-card .emoji{ font-size:22px; }
-.item-card .nm{ font-weight:700; font-size:14px; line-height:1.25; }
-.item-card .pr{ font-size:13px; font-weight:700; color:var(--red); font-family:var(--font-mono); margin-top:auto; }
+.item-card .nm{ font-weight:700; font-size:13.5px; line-height:1.25; }
+.item-card .pr{ font-size:12.5px; font-weight:700; color:var(--red); font-family:var(--font-mono); margin-top:auto; }
 
-.ticket-rail{
-  width:var(--cart-w); flex:0 0 var(--cart-w); background:var(--surface-sunken); border-left:1px solid var(--border);
-  display:flex; flex-direction:column; height:100%;
+.order-summary-bar{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+  padding:14px 18px; background:var(--red); color:#fff; cursor:pointer; border:none;
+  font-weight:700; font-size:14px; width:100%; text-align:left;
 }
-.ticket-head{ padding:16px 18px; border-bottom:1px dashed var(--border-strong); }
+.order-summary-bar .count{ font-size:11.5px; opacity:0.85; font-weight:600; }
+.order-summary-bar .amt{ font-family:var(--font-mono); font-size:16px; }
+
+.ticket-rail{ display:flex; flex-direction:column; height:100%; background:var(--surface-sunken); }
+.ticket-head{ padding:14px 18px; border-bottom:1px dashed var(--border-strong); display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .ticket-head .who{ font-size:16px; font-weight:800; }
 .ticket-head .meta{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; font-family:var(--font-mono); }
 .ticket-items{ flex:1; overflow-y:auto; padding:6px 18px; }

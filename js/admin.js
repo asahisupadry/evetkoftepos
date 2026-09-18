@@ -44,11 +44,8 @@ const Admin = (() => {
       ["settings", "Settings", Icons.gear],
     ];
     rail.innerHTML = `
-      <div class="nav-brand"><div class="mark">EK</div><div class="label">Admin</div></div>
       ${items.map(([v, label, ic]) => `<button class="nav-btn ${state.view === v ? "active" : ""}" data-nav="${v}"><span class="ic">${ic}</span>${label}</button>`).join("")}
-      <div class="nav-spacer"></div>
-      <div class="nav-clock"><b data-clock="time-short">--:--</b><span data-clock="date-short">…</span></div>
-      <button class="nav-btn danger" data-nav="logout" style="margin-top:8px;"><span class="ic">${Icons.logout}</span>Exit</button>
+      <button class="nav-btn danger" data-nav="logout"><span class="ic">${Icons.logout}</span>Exit</button>
     `;
     rail.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => {
       if (b.dataset.nav === "logout") return App.goRoleSelect();
@@ -67,8 +64,15 @@ const Admin = (() => {
     };
     const [title, sub] = titles[state.view];
     document.getElementById("topbar").innerHTML = `
-      <div class="topbar-left"><h1>${title}</h1><div class="sub">${sub}</div></div>
-      <div class="topbar-right"><span class="badge badge-closed"><span class="dot"></span>Admin Mode</span></div>`;
+      <div class="topbar-left row gap-sm">
+        <div class="topbar-mark">EK</div>
+        <div><h1>${title}</h1><div class="sub">${sub}</div></div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock"><b data-clock="time-short">--:--</b><span data-clock="date-short">…</span></div>
+        <span class="badge badge-closed"><span class="dot"></span>Admin</span>
+      </div>`;
+    App.tickClock();
   }
 
   /* ==================================================================
@@ -518,7 +522,7 @@ const Admin = (() => {
     const content = document.getElementById("content");
     const s = DB.getSettings();
     content.innerHTML = `
-      <div class="grid" style="grid-template-columns:1fr 1fr;align-items:start;">
+      <div class="grid" style="grid-template-columns:1fr;align-items:start;">
         <div class="card card-pad">
           <div class="section-title">Restaurant</div>
           <div class="field"><label>Restaurant Name</label><input id="s-name" value="${Utils.escapeHtml(s.restaurantName)}"></div>

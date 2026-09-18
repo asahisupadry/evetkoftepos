@@ -4,7 +4,7 @@
 
 const Cashier = (() => {
 
-  const state = { view: "dashboard", tabId: null, menuTab: "food", operatorName: "" };
+  const state = { view: "dashboard", tabId: null, menuTab: "food", operatorName: "", orderSubView: "menu" };
 
   function platformTag(orderType) {
     if (orderType === "grab") return `<span class="grab-tag">GRAB</span> `;
@@ -43,15 +43,9 @@ const Cashier = (() => {
   function renderNav() {
     const rail = document.getElementById("nav-rail");
     rail.innerHTML = `
-      <div class="nav-brand">
-        <div class="mark">EK</div>
-        <div class="label">Cashier</div>
-      </div>
       <button class="nav-btn ${state.view === "dashboard" ? "active" : ""}" data-nav="dashboard"><span class="ic">${Icons.home}</span>Home</button>
       <button class="nav-btn ${state.view === "expenses" ? "active" : ""}" data-nav="expenses"><span class="ic">${Icons.receipt}</span>Expenses</button>
-      <div class="nav-spacer"></div>
-      <div class="nav-clock"><b data-clock="time-short">--:--</b><span data-clock="date-short">…</span></div>
-      <button class="nav-btn danger" data-nav="logout" style="margin-top:8px;"><span class="ic">${Icons.logout}</span>Switch</button>
+      <button class="nav-btn danger" data-nav="logout"><span class="ic">${Icons.logout}</span>Switch</button>
     `;
     rail.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => {
       const v = b.dataset.nav;
@@ -74,17 +68,23 @@ const Cashier = (() => {
             <div class="sub">Building order</div>
           </div>
         </div>
-        <div class="topbar-right"></div>`;
+        <div class="topbar-right"><div class="topbar-clock"><b data-clock="time-short">--:--</b><span data-clock="date-short">…</span></div></div>`;
       bar.querySelector("[data-back]").onclick = () => { state.view = "dashboard"; state.tabId = null; render(); };
+      App.tickClock();
       return;
     }
     const titles = { dashboard: ["Dashboard", state.operatorName], expenses: ["Expenses", "Ingredients, utilities & other costs"] };
     const [title, sub] = titles[state.view] || ["Evet Kofte", ""];
     bar.innerHTML = `
-      <div class="topbar-left"><h1>${title}</h1><div class="sub">${Utils.escapeHtml(sub)}</div></div>
+      <div class="topbar-left row gap-sm">
+        <div class="topbar-mark">EK</div>
+        <div><h1>${title}</h1><div class="sub">${Utils.escapeHtml(sub)}</div></div>
+      </div>
       <div class="topbar-right">
-        ${session ? `<span class="badge badge-open"><span class="dot"></span>Session Open</span>` : `<span class="badge badge-closed"><span class="dot"></span>Session Closed</span>`}
+        <div class="topbar-clock"><b data-clock="time-short">--:--</b><span data-clock="date-short">…</span></div>
+        ${session ? `<span class="badge badge-open"><span class="dot"></span>Open</span>` : `<span class="badge badge-closed"><span class="dot"></span>Closed</span>`}
       </div>`;
+    App.tickClock();
   }
 
   /* ------------------------------------------------------------------ */
@@ -174,7 +174,7 @@ const Cashier = (() => {
       <div class="tab-card new" data-new-foodpanda>${Icons.cloud}<span>New FoodPanda Order</span></div>
     `;
     grid.querySelectorAll("[data-open-tab]").forEach(c => c.onclick = () => {
-      state.view = "order"; state.tabId = c.dataset.openTab; render();
+      state.view = "order"; state.tabId = c.dataset.openTab; state.orderSubView = "menu"; render();
     });
     grid.querySelector("[data-new-tab]").onclick = () => openNewTabModal();
     grid.querySelector("[data-new-grab]").onclick = () => openNewGrabModal();
@@ -216,7 +216,7 @@ const Cashier = (() => {
       if (!name) { Utils.toast("Enter a customer name.", "error"); return; }
       const tab = DB.createTab(name, "dine-in");
       Utils.closeOverlay();
-      state.view = "order"; state.tabId = tab.id; render();
+      state.view = "order"; state.tabId = tab.id; state.orderSubView = "menu"; render();
     };
     wrap.querySelector("[data-create]").onclick = create;
     input.addEventListener("keydown", e => { if (e.key === "Enter") create(); });
@@ -248,7 +248,7 @@ const Cashier = (() => {
       if (!ref) { Utils.toast("Enter the Grab order/reference number.", "error"); return; }
       const tab = DB.createTab(ref, "grab");
       Utils.closeOverlay();
-      state.view = "order"; state.tabId = tab.id; render();
+      state.view = "order"; state.tabId = tab.id; state.orderSubView = "menu"; render();
     };
     wrap.querySelector("[data-create]").onclick = create;
     input.addEventListener("keydown", e => { if (e.key === "Enter") create(); });
@@ -280,7 +280,7 @@ const Cashier = (() => {
       if (!ref) { Utils.toast("Enter the FoodPanda order/reference number.", "error"); return; }
       const tab = DB.createTab(ref, "foodpanda");
       Utils.closeOverlay();
-      state.view = "order"; state.tabId = tab.id; render();
+      state.view = "order"; state.tabId = tab.id; state.orderSubView = "menu"; render();
     };
     wrap.querySelector("[data-create]").onclick = create;
     input.addEventListener("keydown", e => { if (e.key === "Enter") create(); });
@@ -335,37 +335,71 @@ const Cashier = (() => {
     if (!tab) { state.view = "dashboard"; render(); return; }
     const platform = (tab.orderType === "grab" || tab.orderType === "foodpanda") ? tab.orderType : null;
     const platformTagClass = platform === "grab" ? "grab-tag" : "foodpanda-tag";
+    const itemCount = tab.items.reduce((a, i) => a + i.qty, 0);
 
     content.innerHTML = `
       <div class="order-layout">
-        <div class="order-menu">
-          <div class="order-menu-tabs">
-            <button class="chip-tab ${state.menuTab === "food" ? "active" : ""}" data-menu-switch="food">${Icons.plate} Food</button>
-            <button class="chip-tab ${state.menuTab === "drinks" ? "active" : ""}" data-menu-switch="drinks">${Icons.cup} Drinks</button>
-            ${platform ? `<span class="${platformTagClass}" style="align-self:center;margin-left:6px;">${platformLabel(platform).toUpperCase()} PRICES</span>` : ""}
-          </div>
-          <div class="menu-scroll" id="menu-scroll"></div>
+        <div class="order-toggle">
+          <button class="order-toggle-btn ${state.orderSubView === "menu" ? "active" : ""}" data-sub="menu">${Icons.plate} Menu</button>
+          <button class="order-toggle-btn ${state.orderSubView === "ticket" ? "active" : ""}" data-sub="ticket">${Icons.receipt} Ticket${itemCount ? ` (${itemCount})` : ""}</button>
         </div>
-        <div class="ticket-rail">
-          <div class="ticket-head">
+        <div class="order-page" id="order-page"></div>
+      </div>`;
+
+    content.querySelectorAll("[data-sub]").forEach(b => b.onclick = () => { state.orderSubView = b.dataset.sub; renderOrderBuilder(); });
+
+    if (state.orderSubView === "ticket") {
+      renderTicketPage(tab, platform);
+    } else {
+      renderMenuPage(tab, platform, platformTagClass);
+    }
+  }
+
+  function renderMenuPage(tab, platform, platformTagClass) {
+    const page = document.getElementById("order-page");
+    page.innerHTML = `
+      <div class="order-menu-tabs">
+        <button class="chip-tab ${state.menuTab === "food" ? "active" : ""}" data-menu-switch="food">${Icons.plate} Food</button>
+        <button class="chip-tab ${state.menuTab === "drinks" ? "active" : ""}" data-menu-switch="drinks">${Icons.cup} Drinks</button>
+        ${platform ? `<span class="${platformTagClass}" style="align-self:center;margin-left:6px;">${platformLabel(platform).toUpperCase()} PRICES</span>` : ""}
+      </div>
+      <div class="menu-scroll" id="menu-scroll"></div>
+      ${tab.items.length ? `
+        <button class="order-summary-bar" id="order-summary-bar">
+          <span><span class="count">${tab.items.reduce((a, i) => a + i.qty, 0)} item(s) in ticket</span><br><span class="amt">${Utils.peso(tab.total)}</span></span>
+          <span>View Ticket ${Icons.chevronRight}</span>
+        </button>` : ""}
+    `;
+    renderMenuGrid();
+    page.querySelectorAll("[data-menu-switch]").forEach(b => b.onclick = () => { state.menuTab = b.dataset.menuSwitch; renderMenuGrid(); syncMenuTabButtons(); });
+    const bar = document.getElementById("order-summary-bar");
+    if (bar) bar.onclick = () => { state.orderSubView = "ticket"; renderOrderBuilder(); };
+  }
+
+  function renderTicketPage(tab, platform) {
+    const page = document.getElementById("order-page");
+    page.innerHTML = `
+      <div class="ticket-rail">
+        <div class="ticket-head">
+          <div>
             <div class="who">${platformTag(tab.orderType)}${Utils.escapeHtml(tab.customerName)}</div>
             <div class="meta">${tab.carriedOver ? `<span style="color:var(--amber);font-weight:700;">↻ Running tab</span> · ` : ""}Opened ${Utils.fmtTimeShort(tab.openedAt)} · ${tab.items.length} line item(s)</div>
           </div>
-          <div class="ticket-items" id="ticket-items"></div>
-          <div class="ticket-foot">
-            <div class="tot-row grand"><span>Total</span><span class="amt">${Utils.peso(tab.total)}</span></div>
-            <button class="btn btn-primary btn-block btn-lg" id="btn-close-tab" style="margin-top:10px;" ${tab.items.length ? "" : "disabled"}>
-              ${platform ? `${Icons.check} Mark ${platformLabel(platform)} Order as Paid` : `${Icons.wallet} Close Tab & Pay`}
-            </button>
-            <button class="btn btn-ghost btn-block" id="btn-void-tab" style="margin-top:6px;color:var(--red);">Void / Cancel ${platform ? "Order" : "Tab"}</button>
-          </div>
+          <button class="btn btn-outline btn-sm" id="btn-add-more">${Icons.plus} Add More</button>
+        </div>
+        <div class="ticket-items" id="ticket-items"></div>
+        <div class="ticket-foot">
+          <div class="tot-row grand"><span>Total</span><span class="amt">${Utils.peso(tab.total)}</span></div>
+          <button class="btn btn-primary btn-block btn-lg" id="btn-close-tab" style="margin-top:10px;" ${tab.items.length ? "" : "disabled"}>
+            ${platform ? `${Icons.check} Mark ${platformLabel(platform)} Order as Paid` : `${Icons.wallet} Close Tab & Pay`}
+          </button>
+          <button class="btn btn-ghost btn-block" id="btn-void-tab" style="margin-top:6px;color:var(--red);">Void / Cancel ${platform ? "Order" : "Tab"}</button>
         </div>
       </div>`;
 
-    renderMenuGrid();
     renderTicketItems();
 
-    content.querySelectorAll("[data-menu-switch]").forEach(b => b.onclick = () => { state.menuTab = b.dataset.menuSwitch; renderMenuGrid(); syncMenuTabButtons(); });
+    document.getElementById("btn-add-more").onclick = () => { state.orderSubView = "menu"; renderOrderBuilder(); };
     document.getElementById("btn-close-tab").onclick = () => {
       if (platform === "grab") openGrabCloseModal(tab.id);
       else if (platform === "foodpanda") openFoodPandaCloseModal(tab.id);

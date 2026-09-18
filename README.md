@@ -50,6 +50,13 @@ one device, works offline. Use **Admin → Settings → Export Backup** regularl
 it downloads one `.json` file you can restore from later if the tablet is ever reset.
 
 ## What's built in
+**Interface:** locked to portrait orientation for the tablet. Navigation lives in a
+bottom bar (thumb-reachable, standard for portrait tablet apps) instead of a side
+rail. The cashier's order screen has a **Menu / Ticket** toggle at the top instead of
+showing both side by side — browse and add items on the Menu page, and a tappable
+summary bar (item count + running total) jumps straight to the Ticket page to review,
+adjust quantities, or check out.
+
 **Cashier:** start/end session, live clock, customer tabs (remembers past names),
 Food (Solo/Meal — meal prompts a drink upgrade with admin-set upcharges) and
 Drinks ordering, per-tab running ticket, cash payment with change due, printable
@@ -132,6 +139,3 @@ head to Admin → Menu to adjust any of them per platform whenever you're ready.
   shared backend (e.g. Firebase) instead of on-device storage.
 - **Daily sales/inventory-usage charts** would layer nicely on top of the existing
   Reports and Inventory data if you want them added later.
-https://github.com/asahisupadry/evetkoftepos.git
-
-

@@ -2,7 +2,7 @@
    Caches the app shell so the POS keeps working with no signal.
    Internet is only needed for the report email/Drive upload step. */
 
-const CACHE_NAME = "evet-kofte-pos-v6";
+const CACHE_NAME = "evet-kofte-pos-v7";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
